@@ -1,0 +1,533 @@
+/* styles.css - This is your original content + additions */
+
+/* Your Original Global Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f3f4f6;
+    display: flex; /* ADDED: Makes the body a flex container for sidebar/main */
+    min-height: 100vh; /* ADDED: Ensures body takes full viewport height */
+}
+
+/* Your Original Container, Headers, Labels, Inputs, Buttons */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 2rem;
+}
+
+h1 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #3b82f6;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+section {
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    background-color: #f9fafb;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 1rem;
+}
+
+h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #718096;
+    margin-bottom: 0.5rem;
+}
+
+label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid #e2e8f0;
+    color: #4a5568;
+    line-height: 1.5rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    display: block;
+    box-shadow: none;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; /* Changed from shadow-sm to box-shadow directly */
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+button {
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease;
+    border: none; /* Ensure buttons don't have default borders */
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+button:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+}
+
+button:disabled:hover {
+    background-color: #a0aec0; /* Keep disabled hover same */
+}
+
+/* Your Original Button Colors (with slight tweaks for consistency) */
+.bg-green-500 { background-color: #48bb78; color: white; }
+.bg-green-500:hover { background-color: #38a169; }
+
+.bg-blue-500 { background-color: #3b82f6; color: white; }
+.bg-blue-500:hover { background-color: #2563eb; }
+
+.bg-indigo-500 { background-color: #4c51bf; color: white; }
+.bg-indigo-500:hover { background-color: #3b43a3; }
+
+.bg-purple-500 { background-color: #805ad5; color: white; }
+.bg-purple-500:hover { background-color: #6b46c1; }
+
+.bg-gray-300 { background-color: #d1d5db; color: #4a5568; } /* Added color to gray button */
+.text-gray-500 { color: #718096; }
+
+.text-red-500 { color: #f56565; }
+
+.border-red-500 { border-color: #f56565; }
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul li {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+ul li:last-child {
+    border-bottom: none;
+}
+
+/* Your Original Utility Classes (Adjusted/Expanded) */
+/* Re-evaluated and simplified based on common usage */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
+.items-center { align-items: center; }
+.flex-grow { flex-grow: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.inset-y-0 { top: 0; bottom: 0; }
+.left-0 { left: 0; }
+.pl-3 { padding-left: 0.75rem; }
+.pr-4 { padding-right: 1rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.p-2 { padding: 0.5rem; }
+.p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
+.p-8 { padding: 2rem; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; } /* Added for no-credentials-found text */
+
+.mt-1 { margin-top: 0.25rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-5 { margin-top: 1.25rem; }
+.mt-6 { margin-top: 1.5rem; }
+.mt-8 { margin-top: 2rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
+
+.w-full { width: 100%; }
+.max-w-md { max-width: 28rem; } /* For search input */
+.max-w-2xl { max-width: 42rem; } /* For modal content */
+.max-w-4xl { max-width: 56rem; } /* For main container */
+.w-64 { width: 16rem; }
+.w-5 { width: 1.25rem; }
+.h-5 { height: 1.25rem; }
+.h-48 { height: 12rem; } /* QR code display height */
+
+.rounded-full { border-radius: 9999px; }
+.rounded-md { border-radius: 0.375rem; }
+.rounded-lg { border-radius: 0.5rem; }
+
+.shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+.shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+
+.border { border-width: 1px; }
+.border-2 { border-width: 2px; }
+.border-b { border-bottom-width: 1px; }
+.border-gray-200 { border-color: #e2e8f0; }
+.border-gray-300 { border-color: #d1d5db; }
+.border-blue-500 { border-color: #3b82f6; } /* Used for selected cards */
+.border-transparent { border-color: transparent; } /* Used for card base state */
+
+/* ADDED: Ring effect for selected cards */
+.ring-2 { box-shadow: 0 0 0 2px; }
+.ring-blue-200 { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); } /* Lighter blue ring for selected */
+
+
+.transition-all { transition-property: all; transition-duration: 0.3s; transition-timing-function: ease-in-out; }
+.duration-200 { transition-duration: 0.2s; }
+.duration-300 { transition-duration: 0.3s; }
+.ease-in-out { transition-timing-function: ease-in-out; }
+
+.transform { /* This property is usually set by utility classes like scale, translate */ }
+.hover\:scale-105:hover { transform: scale(1.05); }
+.hover\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+
+.cursor-pointer { cursor: pointer; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+.hidden { display: none; }
+.block { display: block; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.875rem; }
+
+.font-bold { font-weight: 700; } /* Adjusted to true bold */
+.font-semibold { font-weight: 600; }
+.leading-tight { line-height: 1.25; } /* Adjusted to unitless line-height */
+
+.bg-gray-100 { background-color: #f7fafc; }
+.text-gray-700 { color: #4a5568; }
+.text-gray-800 { color: #2d3748; }
+.text-blue-600 { color: #2563eb; } /* Used for icons, primary blue */
+
+
+/* Your Original Modal Styles (Adjusted for consistency) */
+/* styles.css */
+
+/* Modals */
+.modal {
+    display: none; /* CHANGE THIS FROM 'flex' TO 'none' */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+    /* Keep these for when JS sets display: flex */
+    justify-content: center; /* Ensures content is centered when visible */
+    align-items: center; /* Ensures content is centered when visible */
+    padding: 20px; /* Add some padding to prevent content from touching edges */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto; /* Changed from 10% auto to auto for flex centering */
+    padding: 2rem;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 0.5rem;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); } /* Adjusted translateY for smoother animation */
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Original modal-header and footer styles often don't have direct usage in the new HTML */
+/* If you use them, ensure they are applied as classes directly to the elements */
+/* .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.modal-header h2 { margin: 0; font-size: 1.5rem; color: #4a5568; }
+.modal-body { margin-bottom: 1.5rem; }
+.modal-body p { margin-bottom: 1rem; color: #718096; line-height: 1.5rem; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; }
+*/
+
+
+.close { /* Adjusted close button positioning */
+    position: absolute;
+    top: 0.75rem; /* Adjusted from 0.5rem */
+    right: 1rem; /* Adjusted from 0.5rem */
+    color: #aaa;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+/* --- ADDED CUSTOM LAYOUT & COMPONENT STYLES --- */
+
+/* Sidebar Layout */
+.sidebar-container { /* Renamed from 'aside' to avoid direct tag styling */
+    width: 16rem; /* w-64 */
+    background-color: #2d3748; /* Dark gray, text-gray-800 like */
+    color: #f7fafc; /* bg-gray-100 like for light text */
+    flex-shrink: 0; /* flex-shrink-0 */
+    padding: 1.5rem; /* p-6 */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+    display: flex; /* flex */
+    flex-direction: column; /* flex-col */
+    height: 100vh; /* Make sidebar fill height */
+    position: sticky; /* Keep sidebar fixed when scrolling content */
+    top: 0; /* Align to top */
+    overflow-y: auto; /* Allow scrolling if menu is too long */
+}
+
+.sidebar-heading {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 600; /* font-semibold */
+    margin-bottom: 1.5rem; /* mb-6 */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Border from previous code */
+    padding-bottom: 1rem; /* pb-4 */
+    color: #f7fafc; /* Ensure heading is light */
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; /* Allows navigation to expand */
+}
+
+.sidebar-nav ul li {
+    margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.sidebar-nav ul li a {
+    display: block; /* block */
+    padding: 0.5rem 1rem; /* py-2 px-4 */
+    border-radius: 0.375rem; /* rounded */
+    color: #e2e8f0; /* text-gray-300 equivalent */
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out; /* transition duration-200 */
+}
+
+.sidebar-nav ul li a:hover {
+    background-color: #4a5568; /* hover:bg-gray-700 */
+}
+
+.sidebar-nav ul li a.active-menu-item {
+    background-color: #4c51bf; /* active-menu-item (indigo-500) */
+    color: white; /* Ensure text is white for active item */
+}
+
+.sidebar-nav ul li.mt-auto {
+    margin-top: auto; /* Pushes logout to bottom */
+}
+
+/* Main Content Layout */
+.main-content {
+    flex-grow: 1; /* flex-grow */
+    padding: 1.5rem; /* p-6 */
+    overflow-y: auto; /* Allow scrolling for main content */
+}
+
+/* Credential Cards Grid Specific Styles */
+.credential-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Auto-filling responsive grid */
+    gap: 1.5rem; /* gap-6 */
+    padding: 0.5rem; /* Small padding */
+}
+
+.credential-card {
+    background-color: #ffffff; /* bg-white */
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+    padding: 1.5rem; /* p-6 */
+    cursor: pointer; /* cursor-pointer */
+    display: flex; /* flex */
+    flex-direction: column; /* flex-col */
+    align-items: center; /* items-center */
+    justify-content: center; /* justify-center */
+    text-align: center; /* text-center */
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease; /* transition-all duration-200 ease-in-out */
+    border: 2px solid transparent; /* Default transparent border */
+    min-height: 12rem; /* min-h-48 (example fixed height, adjust as needed) */
+}
+
+.credential-card:hover {
+    transform: translateY(-0.25rem); /* Slightly lift on hover */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+    border-color: #a0aec0; /* Border color on hover (gray-400 like) */
+}
+
+.credential-card.selected {
+    border-color: #3b82f6; /* blue-500 */
+    background-color: #e0f2fe; /* Light blue (similar to blue-100) */
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); /* Ring effect */
+    transform: none; /* No extra lift when selected */
+}
+
+.card-icon-wrapper { /* Wrapper for the SVG icon */
+    background-color: #eff6ff; /* Lightest blue (similar to blue-50) */
+    border-radius: 9999px; /* rounded-full */
+    padding: 0.75rem; /* p-3 */
+    margin-bottom: 0.75rem; /* mb-3 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-icon {
+    width: 2.5rem; /* h-10 w-10 (adjust as desired for icon size) */
+    height: 2.5rem;
+    color: #2563eb; /* text-blue-600 */
+}
+
+.card-title {
+    font-size: 1.125rem; /* text-lg */
+    font-weight: 600; /* font-semibold */
+    color: #2d3748; /* text-gray-800 */
+    margin-bottom: 0.25rem; /* mb-1 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.card-type {
+    font-size: 0.875rem; /* text-sm */
+    color: #718096; /* text-gray-500 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Floating "Start Issuance" Button */
+.fixed-bottom-right {
+    position: fixed; /* fixed */
+    bottom: 1.5rem; /* bottom-6 */
+    right: 1.5rem; /* right-6 */
+    padding: 1rem 2rem; /* py-4 px-8 */
+    border-radius: 9999px; /* rounded-full */
+    font-weight: 600; /* font-semibold */
+    font-size: 1rem; /* text-base */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+    transition: all 0.3s ease-in-out; /* transition-all duration-300 ease-in-out */
+    z-index: 50; /* Ensure it floats above others */
+}
+
+/* QR Code Display Enhancements (Matching your provided styles) */
+.qr-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 12rem; /* h-48 */
+    background-color: #fff; /* bg-white */
+    border: 1px solid #e2e8f0; /* border border-gray-200 */
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.06); /* shadow-inner */
+}
+
+.qr-text-content {
+    background-color: #f7fafc; /* bg-gray-100 */
+    padding: 1rem; /* p-4 */
+    border-radius: 0.375rem; /* rounded-md */
+    font-size: 0.875rem; /* text-sm */
+    text-align: left; /* text-left */
+    overflow: auto; /* overflow-auto */
+    max-height: 25rem; /* max-h-400px (approx) */
+    margin-top: 1rem; /* mt-4 */
+    color: #4a5568; /* text-gray-700 */
+}
+
+
+/* Responsive adjustments for grids (from your provided styles) */
+@media (min-width: 768px) {
+    .credential-cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)); /* For medium screens */
+    }
+}
+@media (min-width: 1024px) { /* Example for larger screens, adjust if needed */
+    .credential-cards-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)); /* For large screens */
+    }
+}
+
+/* Responsive adjustments for sidebar on small screens */
+@media (max-width: 768px) {
+    body { flex-direction: column; }
+    .sidebar-container {
+        width: 100%;
+        height: auto;
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    .main-content { padding: 1rem; }
+    .container { padding: 1.5rem; border-radius: 0.5rem; }
+    .content-section { padding: 1rem; border-radius: 0.375rem; }
+    .modal-content { width: 95%; padding: 1.5rem; }
+
+    .fixed-bottom-right {
+        position: static; /* Make static on small screens */
+        width: 100%;
+        margin-top: 1.5rem;
+        border-radius: 0.5rem; /* Adjust corner radius for full width */
+        margin-left: auto;
+        margin-right: auto;
+        bottom: auto; /* Reset fixed positioning */
+        right: auto;
+    }
+}

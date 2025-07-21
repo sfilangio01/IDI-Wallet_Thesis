@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resolve DID - DI WALLET</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+  <aside class="w-64 bg-gray-800 text-white flex-shrink-0">
+    <div class="p-6">
+      <h2 class="text-2xl font-semibold mb-6 border-b border-gray-700 pb-4">DI WALLET</h2>
+      <nav>
+        <ul>
+          <li class="mb-2"><a href="index.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Dashboard</a></li>
+          <li class="mb-2"><a href="identities.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Identities</a></li>
+          <li class="mb-2"><a href="issue-credential.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Issue Credential</a></li>
+          <li class="mb-2"><a href="credentials.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Manage Credentials</a></li>
+          <li class="mb-2"><a href="present-credential.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Present Credential</a></li>
+          <li class="mb-2"><a href="resolve-did.html" class="block py-2 px-4 rounded bg-gray-700">Resolve DID</a></li>
+          <li class="mb-2 mt-auto"><a href="#" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Logout</a></li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="flex-grow p-6">
+    <div class="container max-w-3xl mx-auto bg-white shadow-md rounded-lg p-8">
+      <h1 class="text-2xl font-semibold text-blue-600 text-center mb-6">Resolve a DID</h1>
+
+      <div class="mb-4">
+        <label for="did-input" class="block text-gray-700 text-sm font-bold mb-2">Enter DID:</label>
+        <input type="text" id="did-input" placeholder="did:ethr:goerli:0x..." class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+      </div>
+
+      <div class="flex justify-center mb-6">
+        <button id="resolve-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition duration-200">Resolve</button>
+      </div>
+
+      <pre id="did-result" class="bg-gray-50 p-4 rounded-md text-sm overflow-auto border border-gray-300" style="display: none;"></pre>
+    </div>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

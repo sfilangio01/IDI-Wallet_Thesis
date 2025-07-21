@@ -1,0 +1,9 @@
+{
+  "@context": {
+    "licenseNumber": "https://sfilangio01.github.io/vc-schemas/schemas/vocab#licenseNumber",
+    "issuingAuthority": "https://sfilangio01.github.io/vc-schemas/schemas/vocab#issuingAuthority",
+    "issueDate": "https://sfilangio01.github.io/vc-schemas/schemas/vocab#issueDate",
+    "expiryDate": "https://sfilangio01.github.io/vc-schemas/schemas/vocab#expiryDate",
+    "drivingClass": "https://sfilangio01.github.io/vc-schemas/schemas/vocab#drivingClass"
+  }
+}

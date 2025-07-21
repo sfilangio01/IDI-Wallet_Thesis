@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "snarkjs": "^0.7.5",
+    "sqlite3": "^5.1.7"
+  }
+}

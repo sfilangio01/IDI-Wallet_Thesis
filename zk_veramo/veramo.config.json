@@ -1,0 +1,105 @@
+{
+    "agent": {
+      "plugins": [
+        {
+          "module": "@veramo/key-manager",
+          "options": {
+            "store": {
+              "module": "@veramo/data-store",
+              "options": {
+                "entities": [
+                  "@veramo/data-store/build/entity/IKey",
+                  "@veramo/data-store/build/entity/PrivateKey",
+                  "@veramo/data-store/build/entity/Did"
+                ],
+                "type": "sqlite",
+                "database": "./veramo.sqlite"
+              }
+            }
+          }
+        },
+        {
+          "module": "@veramo/did-manager",
+          "options": {
+            "store": {
+              "module": "@veramo/data-store",
+              "options": {
+                "entities": [
+                  "@veramo/data-store/build/entity/IKey",
+                  "@veramo/data-store/build/entity/PrivateKey",
+                  "@veramo/data-store/build/entity/Did"
+                ],
+                "type": "sqlite",
+                "database": "./veramo.sqlite"
+              }
+            },
+            "defaultProvider": "did:key",
+            "providers": {
+              "did:key": {
+                "module": "@veramo/did-provider-key",
+                "options": {
+                  "defaultKms": "local"
+                }
+              }
+            }
+          }
+        },
+        {
+          "module": "@veramo/kms-local",
+          "options": {
+            "store": {
+              "module": "@veramo/data-store",
+              "options": {
+                "entities": [
+                  "@veramo/data-store/build/entity/IKey",
+                  "@veramo/data-store/build/entity/PrivateKey",
+                  "@veramo/data-store/build/entity/Did"
+                ],
+                "type": "sqlite",
+                "database": "./veramo.sqlite"
+              }
+            },
+            "kms": {
+              "local": {
+                "module": "@veramo/kms-local/build/index",
+                "options": {
+                  "privateKeyStore": {
+                    "module": "@veramo/data-store",
+                    "options": {
+                      "entities": [
+                        "@veramo/data-store/build/entity/IKey",
+                        "@veramo/data-store/build/entity/PrivateKey",
+                        "@veramo/data-store/build/entity/Did"
+                      ],
+                      "type": "sqlite",
+                      "database": "./veramo.sqlite"
+                    }
+                  },
+                  "secretBox": {
+                    "module": "@veramo/kms-local/build/secret-box",
+                    "options": {
+                      "key": "YOUR_ENCRYPTION_KEY_HERE"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "module": "./polygon-id-plugin.js",
+          "options": {}
+      },
+        {
+          "module": "@veramo/did-resolver",
+          "options": {
+            "resolvers": {
+              "did:key": {
+                "module": "@veramo/did-provider-key/build/did-key-resolver"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
