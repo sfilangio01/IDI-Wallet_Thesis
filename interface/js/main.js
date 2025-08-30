@@ -1,7 +1,7 @@
 // js/main.js
 
 import { getElement } from './utils.js';
-import { loadIdentities, setupIdentityEventListeners } from './identity-manager.js';
+import { loadAllIdentities, setupIdentityEventListeners } from './identity-manager.js';
 import { setupCredentialIssuerEventListeners } from './credential-issuer.js';
 import { setupCredentialManagerEventListeners } from './credential-manager.js';
 import { setupPresentationEventListeners } from './presentation-manager.js';
@@ -86,8 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial page load actions (global) ---
     // This loads identities for dropdowns on various pages (Issue, Manage, etc.)
-    console.log("main.js: Calling loadIdentities.");
-    loadIdentities();
+    console.log("main.js: Calling loadAllIdentities.");
+    loadAllIdentities();
 
     // --- Logout Functionality ---
     const logoutBtn = getElement('logout-btn');

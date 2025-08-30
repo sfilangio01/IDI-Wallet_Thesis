@@ -3,7 +3,7 @@
 // --- Configuration Constants ---
 // BASE URL for your Privado ID / Polygon ID issuer service.
 // IMPORTANT: Update this with your current Tunnelmole URL, ensuring it ends with /v2.
-export const privadoBaseUrl = 'http://vgsslm-ip-91-209-212-175.tunnelmole.net/v2';
+export const privadoBaseUrl = 'http://hc17do-ip-37-228-209-200.tunnelmole.net/v2';
 // BASE URL for your Veramo agent.
 export const veramoBaseUrl = 'http://localhost:3332/agent';
 // Authorization header for your Privado ID / Polygon ID API.

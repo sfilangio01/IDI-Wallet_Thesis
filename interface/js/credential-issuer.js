@@ -1,10 +1,150 @@
-// js/credential-issuer.js
-
 import { IssuanceRequest } from '../classes/issuance-request.js';
-import { getElement, fetchData } from './utils.js';
-import { privadoBaseUrl, authorizationHeader, credentialTemplates } from './config.js';
+import { getElement, fetchData, encryptWithKey, decryptWithKey } from './utils.js';
+import { privadoBaseUrl, authorizationHeader, veramoBaseUrl, veramoAuthToken } from './config.js';
 import { getSelectedCredentialTemplates, clearSelectedCredentialTemplates } from './credential-selector.js';
-import { populateIdentitySelect } from './identity-manager.js'; // Needed to populate issuer dropdown
+
+// No longer needed: `populateIdentitySelect` is replaced by `populateAllIssuers`
+// import { populateIdentitySelect } from './identity-manager.js';
+
+const KEY = "Key123";
+
+/* VERAMO SUPPORT FUNCTIONS */
+
+/**
+ * Issues a Verifiable Credential using the Veramo agent and stores it encrypted.
+ * @param {string} issuerDid - The DID of the credential issuer.
+ * @param {string} subjectDid - The DID of the credential subject.
+ * @param {object} template - The credential template from config.js.
+ * @param {object} credentialSubjectData - The claim data for the credential subject.
+ * @returns {Promise<object>} The hash of the newly saved Verifiable Credential.
+ */
+async function issueVeramoCredential(issuerDid, subjectDid, template, credentialSubjectData) {
+    const payload = {
+        credential: {
+            issuer: { id: issuerDid },
+            credentialSubject: { id: subjectId, ...credentialSubjectData },
+            type: ["VerifiableCredential", template.type],
+            issuanceDate: new Date().toISOString()
+        },
+        proofFormat: 'jwt' // Or 'lds' for Linked Data Signatures
+    };
+
+    console.log('Attempting to issue Veramo Credential:', payload);
+    
+    try {
+        // Step 1: Create the credential
+        const createdCredential = await fetchData(
+            `${veramoBaseUrl}/createVerifiableCredential`,
+            'POST',
+            { 'Authorization': veramoAuthToken },
+            payload
+        );
+        console.log('Veramo Credential created:', createdCredential);
+        
+        // Step 2: Encrypt the credential data
+        const encryptedData = await encryptWithKey(JSON.stringify(createdCredential), KEY);
+
+        // Step 3: Create a new payload with the encrypted data
+        const encryptedCredentialPayload = {
+            verifiableCredential: {
+                ...createdCredential,
+                // Add an encrypted flag and the encrypted data string
+                encrypted: true,
+                encryptedData: encryptedData
+            }
+        };
+
+        // Step 4: Save the encrypted credential to the Veramo data store
+        const credentialHash = await fetchData(
+            `${veramoBaseUrl}/dataStoreSaveVerifiableCredential`,
+            'POST',
+            { 'Authorization': veramoAuthToken },
+            encryptedCredentialPayload
+        );
+        console.log('Veramo Credential saved with hash:', credentialHash);
+        
+        return { createdCredential, hash: credentialHash };
+    } catch (error) {
+        console.error('Error during Veramo credential issuance or storage:', error);
+        throw error;
+    }
+}
+
+
+/**
+ * Loads Veramo-managed DIDs and updates a shared state.
+ * This function will fetch DIDs from your Veramo agent instance.
+ * @returns {Promise<Array<object>>} An array of Veramo-managed DID objects.
+ */
+async function loadVeramoDids() {
+    try {
+        // The endpoint is `didManagerFind`, and an empty body returns all DIDs
+        const veramoDids = await fetchData(`${veramoBaseUrl}/didManagerFind`, 'POST', { 'Authorization': veramoAuthToken }, {});
+        
+        // Add a source label to each DID object for clear differentiation in the UI
+        return veramoDids.map(did => ({ ...did, source: 'veramo', displayName: did.alias || did.did }));
+    } catch (error) {
+        console.error("Error loading DIDs from Veramo agent:", error);
+        return []; // Return an empty array on error
+    }
+}
+
+/**
+ * Loads existing identities from the Privado ID service.
+ * This is your original function, now a helper for the combined DID list.
+ * @returns {Promise<Array<object>>} An array of Privado ID identities.
+ */
+async function loadPrivadoIdentities() {
+    try {
+        const identities = await fetchData(`${privadoBaseUrl}/identities`, 'GET', { 'Authorization': authorizationHeader, 'accept': 'application/json' });
+        // Add a source label to each identity
+        return identities.map(identity => ({ ...identity, source: 'privado' }));
+    } catch (error) {
+        console.error("Error loading identities from Privado ID:", error);
+        return [];
+    }
+}
+
+/**
+ * Fetches DIDs from both Privado ID and Veramo and populates the UI dropdown.
+ * This replaces the original `loadIdentities` function.
+ */
+async function populateAllIssuers() {
+    // We will have a combined list of all DIDs available for issuance
+    let allIssuers = [];
+    
+    // Fetch DIDs from Veramo and label them
+    const veramoDids = await loadVeramoDids();
+    allIssuers = allIssuers.concat(veramoDids);
+    
+    // Fetch identities from Privado ID and label them
+    const privadoIdentities = await loadPrivadoIdentities();
+    allIssuers = allIssuers.concat(privadoIdentities);
+    
+    // Populate the dropdown with the combined list
+    const identitySelectElement = getElement('identity-select');
+    if (!identitySelectElement) return;
+
+    identitySelectElement.innerHTML = '';
+    if (allIssuers.length > 0) {
+        allIssuers.forEach(issuer => {
+            const option = document.createElement('option');
+            // The value is the DID itself
+            const did = issuer.did || issuer.identifier;
+            option.value = did;
+            // The display text includes the source for clarity
+            const displayName = issuer.displayName || issuer.alias || 'Unnamed';
+            option.textContent = `${displayName} (${did}) - [${issuer.source}]`;
+            option.dataset.source = issuer.source; // Use data attributes for easy access
+            identitySelectElement.appendChild(option);
+        });
+    } else {
+        const option = document.createElement('option');
+        option.textContent = 'No issuers available';
+        identitySelectElement.appendChild(option);
+        option.disabled = true;
+    }
+}
 
 /**
  * Renders dynamic input fields for a specific credential template within the issuance modal.
@@ -116,7 +256,8 @@ export function resetIssuanceForm() {
     const identitySelectElement = getElement('identity-select');
     if (identitySelectElement) {
         identitySelectElement.value = identitySelectElement.options[0]?.value || '';
-        populateIdentitySelect([]); // Re-populate to ensure fresh state or empty
+        // Now using populateAllIssuers instead of populateIdentitySelect
+        populateAllIssuers();
     }
     const subjectId = getElement('subjectId');
     if (subjectId) subjectId.value = '';
@@ -185,22 +326,19 @@ export function setupCredentialIssuerEventListeners() {
     const closeQrModalAndResetFormBtn = getElement('close-qr-modal-and-reset-form-btn');
     const qrCodeModal = getElement('qr-code-modal');
 
+    const issueVeramoVcBtn = getElement('issue-veramo-vc-btn');
 
     if (startIssuanceProcessBtn) {
-        startIssuanceProcessBtn.addEventListener('click', () => {
+        startIssuanceProcessBtn.addEventListener('click', async () => {
             const selectedTemplates = getSelectedCredentialTemplates();
             if (selectedTemplates.length === 0) {
                 alert('Please select at least one credential type first.');
                 return;
             }
 
-            // Populate issuer dropdown (might be needed again if identities change)
-            populateIdentitySelect([]); // Clear first, then load fresh
-            // Assuming loadIdentities() is called globally on page load,
-            // the 'identity-select' will already be populated. If not, call it here.
+            await populateAllIssuers();
 
-            // Render dynamic forms for selected templates
-            dynamicFormsDiv.innerHTML = ''; // Clear previous forms
+            dynamicFormsDiv.innerHTML = '';
             selectedTemplates.forEach(template => {
                 renderDynamicCredentialForm(template, dynamicFormsDiv);
             });
@@ -223,6 +361,13 @@ export function setupCredentialIssuerEventListeners() {
             if (!validateIssuanceDetailsForm()) { return; }
 
             const issuerDid = getElement('identity-select').value;
+            const selectedOption = getElement('identity-select').selectedOptions[0];
+            const issuerSource = selectedOption.dataset.source;
+            if (issuerSource === 'veramo') {
+                alert('You have selected a Veramo DID. Please use the "Issue with Veramo" button.');
+                return;
+            }
+            
             const subjectId = getElement('subjectId').value;
             const expiration = parseInt(getElement('expiration').value) || undefined;
 
@@ -239,7 +384,7 @@ export function setupCredentialIssuerEventListeners() {
                         if (inputElement.type === 'checkbox') {
                             credentialSubject[field.id] = inputElement.checked;
                         } else if (field.type === 'number') {
-                            credentialSubject[field.id] = parseFloat(inputElement.value) || undefined; // Use parseFloat for salary/GPA, etc.
+                            credentialSubject[field.id] = parseFloat(inputElement.value) || undefined;
                         } else if (field.type === 'date') {
                             const dateValue = inputElement.value;
                             if (dateValue) {
@@ -288,7 +433,7 @@ export function setupCredentialIssuerEventListeners() {
 
                     if (offerResponse.universalLink) {
                         console.log(`${template.name} Universal Link:`, offerResponse.universalLink);
-                        if (!firstQrLink) { // Store the first one to display
+                        if (!firstQrLink) {
                             firstQrLink = offerResponse.universalLink;
                         }
                         alert(`${template.name} issued and QR Link obtained. Click OK to continue.`);
@@ -318,11 +463,74 @@ export function setupCredentialIssuerEventListeners() {
         });
     }
 
-    // New button to close QR modal and reset the form
     if (closeQrModalAndResetFormBtn) {
         closeQrModalAndResetFormBtn.addEventListener('click', () => {
             if (qrCodeModal) qrCodeModal.style.display = 'none';
-            resetIssuanceForm(); // Reset entire issuance flow
+            resetIssuanceForm();
+        });
+    }
+
+    // New event listener for the Veramo issuance button
+    if (issueVeramoVcBtn) {
+        issueVeramoVcBtn.addEventListener('click', async () => {
+            if (!validateIssuanceDetailsForm()) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+            
+            const issuerDid = getElement('identity-select').value;
+            const selectedOption = getElement('identity-select').selectedOptions[0];
+            const issuerSource = selectedOption.dataset.source;
+            if (issuerSource !== 'veramo') {
+                 alert('You have selected a Privado ID DID. Please use the "Issue with Privado ID" button.');
+                 return;
+            }
+            
+            const subjectId = getElement('subjectId').value;
+            
+            const selectedTemplates = getSelectedCredentialTemplates();
+            if (selectedTemplates.length === 0) {
+                alert('Please select a credential template first.');
+                return;
+            }
+            const template = selectedTemplates[0];
+
+            const credentialSubjectData = {};
+            template.fields.forEach(field => {
+                const inputElement = getElement(`${template.type}-${field.id}`);
+                if (inputElement) {
+                    if (inputElement.type === 'checkbox') {
+                        credentialSubjectData[field.id] = inputElement.checked;
+                    } else if (field.type === 'number') {
+                        credentialSubjectData[field.id] = parseFloat(inputElement.value) || undefined;
+                    } else if (field.type === 'date') {
+                        const dateValue = inputElement.value;
+                        if (dateValue) {
+                            credentialSubjectData[field.id] = parseInt(dateValue.replace(/-/g, ''));
+                        } else {
+                            credentialSubjectData[field.id] = undefined;
+                        }
+                    } else {
+                        credentialSubjectData[field.id] = inputElement.value.trim();
+                    }
+                }
+            });
+
+            try {
+                const result = await issueVeramoCredential(issuerDid, subjectId, template, credentialSubjectData);
+                
+                alert(`Veramo Credential issued and saved successfully! The credential hash is: ${result.hash}`);
+                console.log('Successfully issued and saved Veramo Credential:', result);
+                
+                if (issuanceDetailsModal) {
+                    issuanceDetailsModal.style.display = 'none';
+                }
+                resetIssuanceForm();
+
+            } catch (error) {
+                console.error('Error issuing Veramo credential:', error);
+                alert(`Error issuing Veramo credential: ${error.message}`);
+            }
         });
     }
 }

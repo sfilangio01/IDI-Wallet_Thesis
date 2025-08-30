@@ -1,6 +1,6 @@
 // js/utils.js
 
-import { authorizationHeader } from './config.js'; // Import authorizationHeader for fetchData
+const KEY = "Key123";
 
 /**
  * Safely retrieves a DOM element by its ID.
@@ -14,7 +14,6 @@ export function getElement(id) {
 
 /**
  * Fetches data from a given URL with specified method, headers, and body.
- * Includes enhanced logging for debugging network calls and error handling for non-JSON responses.
  * @param {string} url - The URL to fetch.
  * @param {string} [method='GET'] - The HTTP method (GET, POST, PUT, DELETE).
  * @param {object} [headers={}] - HTTP headers to include in the request.
@@ -25,7 +24,7 @@ export function getElement(id) {
 export async function fetchData(url, method = 'GET', headers = {}, body = null) {
     const options = {
         method: method,
-        headers: { ...headers }, // Create a shallow copy to modify safely
+        headers: { ...headers },
     };
 
     if (body) {
@@ -33,13 +32,12 @@ export async function fetchData(url, method = 'GET', headers = {}, body = null) 
         options.body = JSON.stringify(body);
     }
 
-    console.log('----------------------------------------------------');
-    console.log('Making API Call:');
-    console.log('   URL:', url);
-    console.log('   Method:', options.method);
-    console.log('   Headers:', options.headers);
-    console.log('   Body:', options.body ? JSON.parse(options.body) : 'N/A');
-    console.log('----------------------------------------------------');
+    console.log('--- Making API Call ---');
+    console.log('URL:', url);
+    console.log('Method:', options.method);
+    console.log('Headers:', options.headers);
+    console.log('Body:', options.body ? JSON.parse(options.body) : 'N/A');
+    console.log('-----------------------');
 
     try {
         const response = await fetch(url, options);
@@ -73,26 +71,99 @@ export async function fetchData(url, method = 'GET', headers = {}, body = null) 
             console.error("Network or CORS error caught:", error);
             throw new Error("Network error (CORS or connection issue). Check browser console for details.");
         } else if (error instanceof DOMException && error.name === 'AbortError') {
-            console.warn("Fetch request was aborted.", error);
-            throw new Error("Fetch request aborted.");
+             console.warn("Fetch request was aborted.", error);
+             throw new Error("Fetch request aborted.");
         }
         throw error;
     }
 }
 
 /**
- * Resets form fields within specified modals to their default values.
- * Note: Assumes modal divs are not actual <form> tags, so directly targets input IDs.
+ * Resets form fields within a specified modal to their default values.
  * @param {string} formId - The ID of the modal div to reset.
  */
 export function resetForm(formId) {
-    // This will be handled by specific module's reset function if complex
-    // For now, keeping a basic version here and letting modules override/extend.
-
-    // Hide all error messages within the modal/form
     const formElement = getElement(formId);
-    if (formElement) {
-        const errorLabels = formElement.querySelectorAll('.text-red-500');
-        errorLabels.forEach(label => label.style.display = 'none');
-    }
+    if (!formElement) return;
+
+    const inputs = formElement.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+            input.checked = input.defaultChecked;
+        } else {
+            input.value = input.defaultValue;
+        }
+    });
+
+    const errorLabels = formElement.querySelectorAll('.text-red-500');
+    errorLabels.forEach(label => label.style.display = 'none');
+}
+
+/**
+ * Encrypts a string of data using a key derived from a password string.
+ * @param {string} data - The plain text string to encrypt.
+ * @param {string} keyString - The password string to derive the encryption key from.
+ * @returns {Promise<string>} The base64-encoded encrypted data.
+ */
+export async function encryptWithKey(data, keyString) {
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(data);
+    const passwordBuffer = encoder.encode(keyString);
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    const key = await window.crypto.subtle.deriveKey(
+        {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: 100000,
+            hash: "SHA-256",
+        },
+        await window.crypto.subtle.importKey("raw", passwordBuffer, { name: "PBKDF2" }, false, ["deriveKey"]),
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+    );
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const encryptedData = await window.crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        dataBuffer
+    );
+    const encryptedBuffer = new Uint8Array(encryptedData);
+    const combinedBuffer = new Uint8Array(salt.length + iv.length + encryptedBuffer.length);
+    combinedBuffer.set(salt);
+    combinedBuffer.set(iv, salt.length);
+    combinedBuffer.set(encryptedBuffer, salt.length + iv.length);
+    return btoa(String.fromCharCode(...combinedBuffer));
+}
+
+/**
+ * Decrypts a base64-encoded string using a key derived from a password string.
+ * @param {string} encryptedText - The base64-encoded string to decrypt.
+ * @param {string} keyString - The password string to derive the decryption key from.
+ * @returns {Promise<string>} The decrypted plain text string.
+ */
+export async function decryptWithKey(encryptedText, keyString) {
+    const combinedBuffer = new Uint8Array(atob(encryptedText).split("").map(c => c.charCodeAt(0)));
+    const salt = combinedBuffer.slice(0, 16);
+    const iv = combinedBuffer.slice(16, 28);
+    const encryptedBuffer = combinedBuffer.slice(28);
+    const passwordBuffer = new TextEncoder().encode(keyString);
+    const key = await window.crypto.subtle.deriveKey(
+        {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: 100000,
+            hash: "SHA-256",
+        },
+        await window.crypto.subtle.importKey("raw", passwordBuffer, { name: "PBKDF2" }, false, ["deriveKey"]),
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+    );
+    const decryptedData = await window.crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        encryptedBuffer
+    );
+    return new TextDecoder().decode(decryptedData);
 }
