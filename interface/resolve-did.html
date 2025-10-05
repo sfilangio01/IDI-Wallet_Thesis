@@ -1,47 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Resolve DID - DI WALLET</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="styles.css"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Resolve DID - Identity & Credential Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel-stylesheet"/>
+    <link rel="stylesheet" href="styles.css"/>
+    <style>
+        .stats-box {
+            background-color: #f0f8ff; /* Light blue/gray for results */
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #b3d9ff;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .stat-item {
+            font-weight: 500;
+            padding: 5px;
+            border-left: 3px solid #3b82f6;
+        }
+        .stat-item strong {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .stat-success { border-left-color: #10b981; }
+        .stat-failure { border-left-color: #ef4444; }
+        .stat-timing { border-left-color: #f59e0b; }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex">
-  <aside class="w-64 bg-gray-800 text-white flex-shrink-0">
-    <div class="p-6">
-      <h2 class="text-2xl font-semibold mb-6 border-b border-gray-700 pb-4">DI WALLET</h2>
-      <nav>
-        <ul>
-          <li class="mb-2"><a href="index.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Dashboard</a></li>
-          <li class="mb-2"><a href="identities.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Identities</a></li>
-          <li class="mb-2"><a href="issue-credential.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Issue Credential</a></li>
-          <li class="mb-2"><a href="credentials.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Manage Credentials</a></li>
-          <li class="mb-2"><a href="present-credential.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Present Credential</a></li>
-          <li class="mb-2"><a href="resolve-did.html" class="block py-2 px-4 rounded bg-gray-700">Resolve DID</a></li>
-          <li class="mb-2 mt-auto"><a href="#" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Logout</a></li>
-        </ul>
-      </nav>
-    </div>
-  </aside>
+    <aside class="w-64 bg-gray-800 text-white flex-shrink-0">
+        <div class="p-6">
+            <h2 class="text-2xl font-semibold mb-6 border-b border-gray-700 pb-4">IDI-WALLET</h2>
+            <nav>
+                <ul>
+                    <li class="mb-2">
+                        <a href="index.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Dashboard</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="identities.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Identities</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="issue-credential.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Issue Credential</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="credentials.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Manage Credentials</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="present-credential.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Present Credential</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="resolve-did.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200 active-menu-item">Resolve DIDs</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
 
-  <main class="flex-grow p-6">
-    <div class="container max-w-3xl mx-auto bg-white shadow-md rounded-lg p-8">
-      <h1 class="text-2xl font-semibold text-blue-600 text-center mb-6">Resolve a DID</h1>
+    <main class="flex-grow p-6">
+        <div class="container max-w-3xl mx-auto bg-white shadow-md rounded-lg p-8">
+            <h1 class="text-2xl font-semibold text-blue-600 text-center mb-6">DID Resolver Tool</h1>
 
-      <div class="mb-4">
-        <label for="did-input" class="block text-gray-700 text-sm font-bold mb-2">Enter DID:</label>
-        <input type="text" id="did-input" placeholder="did:ethr:goerli:0x..." class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"/>
-      </div>
+            <div class="mb-6 border-b pb-4">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Single DID Resolution</h3>
+                <div class="mb-4">
+                    <label for="did-input" class="block text-gray-700 text-sm font-bold mb-2">Enter DID:</label>
+                    <input type="text" id="did-input" placeholder="did:ethr:sepolia:0x..." class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"/>
+                </div>
+                <div class="flex justify-center">
+                    <button id="resolve-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition duration-200">Resolve DID</button>
+                </div>
+            </div>
 
-      <div class="flex justify-center mb-6">
-        <button id="resolve-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition duration-200">Resolve</button>
-      </div>
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">DID Resolution Test Suite</h3>
+                <div class="flex justify-center mb-4">
+                    <button id="did-test-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-md transition duration-200">Run Full Test (100+ DIDs)</button>
+                </div>
+                <div id="test-suite-status" class="stats-box" style="display: none;">
+                    <p class="text-lg font-bold mb-2 text-indigo-700" id="test-suite-header">Test Status: Starting...</p>
+                    <div id="test-suite-details"></div>
+                </div>
+            </div>
 
-      <pre id="did-result" class="bg-gray-50 p-4 rounded-md text-sm overflow-auto border border-gray-300" style="display: none;"></pre>
-    </div>
-  </main>
+            <textarea id="did-result" class="bg-gray-50 p-4 rounded-md text-sm overflow-auto border border-gray-300 w-full" rows="15" readonly style="display: none; resize: vertical;"></textarea>
+            <p class="text-red-600 text-sm mt-2" id="error-message" style="display: none;"></p>
+        </div>
+    </main>
 
-  <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

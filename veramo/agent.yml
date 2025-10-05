@@ -135,7 +135,7 @@ server:
           - swaggerOptions:
               url: '/open-api.json'
 
-  # Execute during server initialization
+    # Execute during server initialization
   init:
     - $require: '@veramo/remote-server?t=function#createDefaultDid'
       $args:
@@ -182,6 +182,126 @@ didResolver:
         $ref: /universal-resolver
       ens:
         $ref: /universal-resolver
+      ebsi:
+        $ref: /universal-resolver
+      # Additions from the provided list
+      ala:
+        $ref: /universal-resolver
+      algo:
+        $ref: /universal-resolver
+      bba:
+        $ref: /universal-resolver
+      bid:
+        $ref: /universal-resolver
+      btc1:
+        $ref: /universal-resolver
+      btcr:
+        $ref: /universal-resolver
+      ccp:
+        $ref: /universal-resolver
+      cheqd:
+        $ref: /universal-resolver
+      cndid:
+        $ref: /universal-resolver
+      com:
+        $ref: /universal-resolver
+      content:
+        $ref: /universal-resolver
+      dns:
+        $ref: /universal-resolver
+      dock:
+        $ref: /universal-resolver
+      dyne:
+        $ref: /universal-resolver
+      emtrust:
+        $ref: /universal-resolver
+      ev:
+        $ref: /universal-resolver
+      evan:
+        $ref: /universal-resolver
+      everscale:
+        $ref: /universal-resolver
+      evrc:
+        $ref: /universal-resolver
+      factom:
+        $ref: /universal-resolver
+      gatc:
+        $ref: /universal-resolver
+      github:
+        $ref: /universal-resolver
+      hcr:
+        $ref: /universal-resolver
+      icon:
+        $ref: /universal-resolver
+      iden3:
+        $ref: /universal-resolver
+      iid:
+        $ref: /universal-resolver
+      indy:
+        $ref: /universal-resolver
+      iota:
+        $ref: /universal-resolver
+      iscc:
+        $ref: /universal-resolver
+      itn:
+        $ref: /universal-resolver
+      jolo:
+        $ref: /universal-resolver
+      keri:
+        $ref: /universal-resolver
+      kilt:
+        $ref: /universal-resolver
+      kscirc:
+        $ref: /universal-resolver
+      lit:
+        $ref: /universal-resolver
+      meta:
+        $ref: /universal-resolver
+      moncon:
+        $ref: /universal-resolver
+      mydata:
+        $ref: /universal-resolver
+      near:
+        $ref: /universal-resolver
+      ont:
+        $ref: /universal-resolver
+      orb:
+        $ref: /universal-resolver
+      oyd:
+        $ref: /universal-resolver
+      pdc:
+        $ref: /universal-resolver
+      plc:
+        $ref: /universal-resolver
+      prism:
+        $ref: /universal-resolver
+      quarkid:
+        $ref: /universal-resolver
+      schema:
+        $ref: /universal-resolver
+      sol:
+        $ref: /universal-resolver
+      stack:
+        $ref: /universal-resolver
+      tgrid:
+        $ref: /universal-resolver
+      tys:
+        $ref: /universal-resolver
+      tz:
+        $ref: /universal-resolver
+      unisot:
+        $ref: /universal-resolver
+      v1:
+        $ref: /universal-resolver
+      vaa:
+        $ref: /universal-resolver
+      webs:
+        $ref: /universal-resolver
+      webvh:
+        $ref: /universal-resolver
+      zkjm:
+        $ref: /universal-resolver
+
 
 ethr-did-resolver:
   $require: ethr-did-resolver?t=function&p=/ethr#getResolver
@@ -265,6 +385,13 @@ didManager:
           $args:
             - defaultKms: local
               chainId: 1
+        # To provide full support for DID creation and management,
+        # you would need to add a dedicated DID Provider for each method here.
+        # For example, for did:sov:
+        # did:sov:
+        #   $require: '@veramo/did-provider-sov#SovDIDProvider'
+        #   $args:
+        #     - defaultKms: local
 
 didDiscovery:
   $require: '@veramo/did-discovery#DIDDiscovery'
@@ -286,7 +413,7 @@ credentialIssuerLD:
         # The LdDefaultContext is a "catch-all" for now.
         - $require: '@veramo/credential-ld?t=object#LdDefaultContexts'
         - $require: '@transmute/credentials-context?t=object#contexts'
-        #  others should be included here
+        # others should be included here
 
 # Agent
 agent:
