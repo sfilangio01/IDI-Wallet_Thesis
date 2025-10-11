@@ -6,6 +6,7 @@ import { setupCredentialIssuerEventListeners } from './credential-issuer.js';
 import { setupCredentialManagerEventListeners } from './credential-manager.js';
 import { setupPresentationEventListeners } from './presentation-manager.js';
 import { setupDidResolverEventListeners } from './did-resolver.js';
+// NEW IMPORT:
 import { setupCredentialSelectorEventListeners } from './credential-selector.js';
 import { handleLogout } from './config.js';
 
@@ -28,6 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (getElement('identity-list') || getElement('create-identity-btn') || getElement('identity-select-delete')) {
             console.log("main.js: Setting up Identity Event Listeners.");
             setupIdentityEventListeners();
+             console.log("main.js: Calling loadAllIdentities.");
+            loadAllIdentities();
+
         }
 
         // Initialize Credential Selector (for grid of cards on issue-credential.html)
@@ -86,9 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial page load actions (global) ---
     // This loads identities for dropdowns on various pages (Issue, Manage, etc.)
-    console.log("main.js: Calling loadAllIdentities.");
-    loadAllIdentities();
-
+   
     // --- Logout Functionality ---
     const logoutBtn = getElement('logout-btn');
     if (logoutBtn) {

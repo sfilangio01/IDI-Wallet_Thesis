@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>DID Creation Benchmark - Identity & Credential Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel-stylesheet"/>
+    <link rel="stylesheet" href="styles.css"/>
+    <style>
+        /* Styles from resolve-did.html for consistency */
+        .stats-box {
+            background-color: #f0f8ff; /* Light blue/gray for results */
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #b3d9ff;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .stat-item {
+            font-weight: 500;
+            padding: 5px;
+            border-left: 3px solid #3b82f6;
+        }
+        .stat-item strong {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .stat-success { border-left-color: #10b981; }
+        .stat-failure { border-left-color: #ef4444; }
+        .stat-timing { border-left-color: #f59e0b; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+    <aside class="w-64 bg-gray-800 text-white flex-shrink-0">
+        <div class="p-6">
+            <h2 class="text-2xl font-semibold mb-6 border-b border-gray-700 pb-4">IDI-WALLET</h2>
+            <nav>
+                <ul>
+                    <li class="mb-2">
+                        <a href="index.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Dashboard</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="identities.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Identities</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="create-did.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200 active-menu-item">DID Creation Benchmark</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="issue-credential.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Issue Credential</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="credentials.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Manage Credentials</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="present-credential.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Present Credential</a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="resolve-did.html" class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">Resolve DIDs</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-grow p-6">
+        <div class="container max-w-3xl mx-auto bg-white shadow-md rounded-lg p-8">
+            <h1 class="text-2xl font-semibold text-teal-600 text-center mb-6">DID Creation Benchmark Suite</h1>
+
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">DID Creation Test Suite</h3>
+                <p class="text-sm text-gray-600 mb-4">Click below to run a performance benchmark creating **${TOTAL_DIDS_TO_CREATE} DIDs** across multiple methods against the Veramo agent.</p>
+                <div class="flex justify-center mb-4">
+                    <button id="did-test-btn" class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded-md transition duration-200">Run Full Creation Test (${TOTAL_DIDS_TO_CREATE} DIDs)</button>
+                </div>
+                <div id="test-suite-status" class="stats-box" style="display: none;">
+                    <p class="text-lg font-bold mb-2 text-indigo-700" id="test-suite-header">Test Status: Starting...</p>
+                    <div id="test-suite-details"></div>
+                </div>
+            </div>
+
+            <p class="text-red-600 text-sm mt-2" id="error-message" style="display: none;"></p>
+        </div>
+    </main>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -376,10 +376,6 @@ didManager:
           $require: '@veramo/did-provider-jwk#JwkDIDProvider'
           $args:
             - defaultKms: local
-        did:peer:
-          $require: '@veramo/did-provider-peer#PeerDIDProvider'
-          $args:
-            - defaultKms: local
         did:pkh:
           $require: '@veramo/did-provider-pkh#PkhDIDProvider'
           $args:

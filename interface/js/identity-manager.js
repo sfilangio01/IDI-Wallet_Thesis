@@ -217,7 +217,9 @@ async function loadVeramoDids() {
                     return { ...did, alias: decryptedAlias, source: 'veramo' };
                 } catch (e) {
                     console.error("Decryption failed for a Veramo DID alias:", e);
-                    return { ...did, alias: `[Decryption Failed] ${did.alias}`, source: 'veramo' };
+                    //return { ...did, alias: `[Decryption Failed] ${did.alias}`, source: 'veramo' };
+                    return { ...did, alias: `${did.alias}`, source: 'veramo' };
+                
                 }
             }
             return { ...did, source: 'veramo' };
