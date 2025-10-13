@@ -78,7 +78,9 @@
                     <button id="resolve-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition duration-200">Resolve DID</button>
                 </div>
             </div>
-
+   <textarea id="did-result" class="bg-gray-50 p-4 rounded-md text-sm overflow-auto border border-gray-300 w-full" rows="30" readonly style="display: none; resize: vertical;"></textarea>
+            <p class="text-red-600 text-sm mt-2" id="error-message" style="display: none;"></p>
+        
             <div class="mb-6">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">DID Latency Test Suites</h3>
                 <div class="flex justify-center space-x-4 mb-4">
@@ -92,9 +94,7 @@
                 </div>
             </div>
 
-            <textarea id="did-result" class="bg-gray-50 p-4 rounded-md text-sm overflow-auto border border-gray-300 w-full" rows="15" readonly style="display: none; resize: vertical;"></textarea>
-            <p class="text-red-600 text-sm mt-2" id="error-message" style="display: none;"></p>
-        </div>
+         </div>
     </main>
 
     <script type="module" src="js/main.js"></script>
