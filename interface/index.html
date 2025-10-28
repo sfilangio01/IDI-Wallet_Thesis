@@ -6,8 +6,61 @@
     <title>Dashboard - Identity & Credential Manager</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* --- Modal Styling for Full-Screen Overlay --- */
+        #password-modal {
+            display: flex; /* Use flex for centering */
+            position: fixed;
+            z-index: 9999; /* High z-index to cover everything */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8); /* Dark, opaque background */
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #password-modal-content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        #password-error {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex">
+
+    <div id="password-modal">
+        <div id="password-modal-content">
+            <h3 class="text-2xl font-bold text-blue-600 mb-4">Wallet Lock 🔒</h3>
+            <p class="text-gray-700 mb-4">Please enter your password to access the IDI-WALLET interface.</p>
+            
+            <input 
+                type="password" 
+                id="master-password" 
+                placeholder="Enter Password" 
+                class="shadow appearance-none border rounded w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4"
+            >
+            
+            <button 
+                id="login-btn" 
+                class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full focus:outline-none focus:shadow-outline"
+            >
+                Unlock Wallet
+            </button>
+            
+            <p id="password-error" class="text-red-500 text-sm font-medium">Incorrect password. Please try again.</p>
+        </div>
+    </div>
     <aside class="w-64 bg-gray-800 text-white flex-shrink-0">
         <div class="p-6">
             <h2 class="text-2xl font-semibold mb-6 border-b border-gray-700 pb-4">IDI-WALLET</h2>
@@ -48,5 +101,56 @@
     </main>
 
     <script type="module" src="js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordModal = document.getElementById('password-modal');
+            const passwordInput = document.getElementById('master-password');
+            const loginBtn = document.getElementById('login-btn');
+            const errorDisplay = document.getElementById('password-error');
+            
+            // The required password
+            const CORRECT_PASSWORD = "key123";
+
+            // Function to handle the login attempt
+            const handleLogin = () => {
+                const enteredPassword = passwordInput.value.trim();
+
+                if (enteredPassword === CORRECT_PASSWORD) {
+                    errorDisplay.style.display = 'none';
+                    // Hide the modal on success
+                    passwordModal.style.opacity = '0';
+                    setTimeout(() => {
+                        passwordModal.style.display = 'none';
+                    }, 300); // Wait for the transition to complete
+                    
+                    // Optionally store a session marker (for a real app)
+                    sessionStorage.setItem('wallet_unlocked', 'true');
+                    
+                } else {
+                    errorDisplay.style.display = 'block';
+                    passwordInput.value = ''; // Clear input on error
+                }
+            };
+
+            // Event listeners
+            loginBtn.addEventListener('click', handleLogin);
+            
+            passwordInput.addEventListener('keypress', (event) => {
+                // Check if the Enter key was pressed
+                if (event.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+
+            // Focus the input field when the modal appears
+            passwordInput.focus();
+            
+            // In a production application, you would check a session cookie/storage
+            // to see if the user is already logged in before showing the modal.
+            // Since the request is to show it "all the time before everything," 
+            // we skip that check here and rely on the initial display: flex in CSS.
+        });
+    </script>
 </body>
 </html>

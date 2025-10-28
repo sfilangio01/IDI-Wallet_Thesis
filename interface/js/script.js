@@ -150,7 +150,7 @@ async function loadIdentities() {
         if (identityList) {
             identityList.innerHTML = `<li class="text-red-500">Error loading identities: ${error.message}</li>`;
         }
-        alert(`Error loading identities: ${error.message}`);
+        //alert(`Error loading identities: ${error.message}`);
     }
 }
 
@@ -289,7 +289,7 @@ async function loadCredentials(issuerIdentifier) {
         if (credentialList) {
             credentialList.innerHTML = `<li class="text-red-500">Error loading credentials: ${error.message}</li>`;
         }
-        alert(`Error loading credentials: ${error.message}`);
+        //alert(`Error loading credentials: ${error.message}`);
     }
 }
 
@@ -566,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetForm('new-identity-modal');
             } catch (error) {
                 console.error("Error creating identity:", error);
-                alert(`Error creating identity: ${error.message}`);
+                //alert(`Error creating identity: ${error.message}`);
             }
         });
     }
@@ -597,7 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Identity deleted successfully!');
             } catch (error) {
                 console.error("Error deleting identity:", error);
-                alert(`Error deleting identity: ${error.message}`);
+                //alert(`Error deleting identity: ${error.message}`);
             }
         });
     }
@@ -738,11 +738,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 } else {
                     console.error("Did not receive a universalLink from credential offer API:", offerResponse);
-                    alert('Failed to generate QR code data: universalLink not found in API response.');
+                    //alert('Failed to generate QR code data: universalLink not found in API response.');
                 }
             } catch (error) {
                 console.error("Error issuing credential or generating QR:", error);
-                alert(`Error: ${error.message}`);
+                //alert(`Error: ${error.message}`);
             }
         });
     }
@@ -812,12 +812,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 } else {
                     console.error("Did not receive a universalLink from credential offer API:", offerResponse);
-                    alert('Failed to generate QR code data: universalLink not found in API response.');
+                    //alert('Failed to generate QR code data: universalLink not found in API response.');
                 }
             } catch (error) {
                 console.error("Error generating QR code for existing credential:", error);
                 if (qrCodeDisplay) qrCodeDisplay.innerHTML = `<p class="text-red-500">Error generating QR code: ${error.message}</p>`;
-                alert(`Error generating QR code: ${error.message}`);
+                //alert(`Error generating QR code: ${error.message}`);
             }
         });
     }
@@ -1078,12 +1078,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Presentation Request QR Code generated successfully! Scan it with your wallet.');
                 } else {
                     if (presentationQrDisplay) presentationQrDisplay.innerHTML = `<p class="text-red-500">Failed to generate presentation QR code data.</p>`;
-                    alert('Failed to generate presentation QR code data. Check console for details.');
+                    //alert('Failed to generate presentation QR code data. Check console for details.');
                 }
             } catch (error) {
                 console.error("Error generating presentation QR code:", error);
                 if (presentationQrDisplay) presentationQrDisplay.innerHTML = `<p class="text-red-500">Error generating presentation QR code: ${error.message}</p>`;
-                alert(`Error generating presentation QR code: ${error.message}`);
+                //alert(`Error generating presentation QR code: ${error.message}`);
             }
         });
     }

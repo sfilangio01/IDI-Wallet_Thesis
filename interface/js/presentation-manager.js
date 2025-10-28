@@ -124,12 +124,12 @@ async function generatePresentation(presentationDefinition, source) {
         if (deeplink) {
             displayQrCode(deeplink);
         } else {
-            alert('Failed to generate a presentation offer. Check the console for details.');
+            //alert('Failed to generate a presentation offer. Check the console for details.');
         }
 
     } catch (error) {
         console.error('Error generating presentation offer:', error);
-        alert('An error occurred while generating the presentation offer. Check the console for more details.');
+        //alert('An error occurred while generating the presentation offer. Check the console for more details.');
     }
 }
 

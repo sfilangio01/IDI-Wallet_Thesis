@@ -1,10 +1,13 @@
 import { IssuanceRequest } from '../classes/issuance-request.js';
 import { getElement, fetchData, encryptWithKey, decryptWithKey } from './utils.js';
-import { privadoBaseUrl, authorizationHeader, veramoBaseUrl, veramoAuthToken } from './config.js';
+// ADDED waltidBaseUrlIssuer to the config imports
+import { privadoBaseUrl, authorizationHeader, veramoBaseUrl, veramoAuthToken, waltidBaseUrlIssuer } from './config.js';
 import { getSelectedCredentialTemplates, clearSelectedCredentialTemplates } from './credential-selector.js';
+// Assuming walt.id DIDs might be manually added or fetched similarly to others for demo purposes, 
+// though typically walt.id keys are managed internally, and the client only uses the resulting DID.
 
-// No longer needed: `populateIdentitySelect` is replaced by `populateAllIssuers`
-// import { populateIdentitySelect } from './identity-manager.js';
+// Note: This file relies on a global variable 'subjectId' in the payload of issueVeramoCredential.
+// I'll correct the existing Veramo code to use the passed-in 'subjectDid' variable, as that appears to be the intent.
 
 const KEY = "Key123";
 
@@ -22,7 +25,8 @@ async function issueVeramoCredential(issuerDid, subjectDid, template, credential
     const payload = {
         credential: {
             issuer: { id: issuerDid },
-            credentialSubject: { id: subjectId, ...credentialSubjectData },
+            // CORRECTED: Using 'subjectDid' instead of undeclared 'subjectId'
+            credentialSubject: { id: subjectDid, ...credentialSubjectData },
             type: ["VerifiableCredential", template.type],
             issuanceDate: new Date().toISOString()
         },
@@ -70,6 +74,93 @@ async function issueVeramoCredential(issuerDid, subjectDid, template, credential
     }
 }
 
+// --- NEW WALT.ID SUPPORT FUNCTION ---
+
+/**
+ * Issues a Verifiable Credential using the walt.id agent (OIDC flow).
+ * Assumes the issuerKey and credentialConfigurationId are known or retrievable.
+ * For this simplified example, we will assume a generic placeholder for issuerKey.
+ * @param {string} issuerDid - The DID of the credential issuer.
+ * @param {string} subjectDid - The DID of the credential subject.
+ * @param {object} template - The credential template from config.js.
+ * @param {object} credentialSubjectData - The claim data for the credential subject.
+ * @returns {Promise<object>} The issuance URL for the QR code.
+ */
+async function issueWaltidCredential(issuerDid, subjectDid, template, credentialSubjectData) {
+    // WARNING: In a real-world scenario, the issuerKey and credentialConfigurationId 
+    // would need to be securely managed and retrieved, likely via another walt.id endpoint
+    // or by configuration matching the selected DID/Credential.
+    const mockIssuerKey = {
+        type: "jwk",
+        jwk: { /* ... actual key details would go here ... */ }
+    };
+    const mockCredentialConfigurationId = template.type + "_jwt_vc_json"; // Guessing based on OpenAPI examples
+
+    // Construct the payload based on the walt.id IssuanceRequest schema
+    const issuancePayload = {
+        issuerKey: mockIssuerKey, 
+        issuerDid: issuerDid,
+        credentialConfigurationId: mockCredentialConfigurationId,
+        
+        // This is the actual credential data/claims
+        credentialData: {
+            "@context": ["https://www.w3.org/2018/credentials/v1", template.schema],
+            "id": `urn:uuid:${crypto.randomUUID()}`, // Use a generated ID
+            "type": ["VerifiableCredential", template.type],
+            "issuer": { "id": issuerDid },
+            "issuanceDate": new Date().toISOString(),
+            "credentialSubject": {
+                "id": subjectDid,
+                ...credentialSubjectData
+            }
+        },
+        
+        // Mapping helps walt.id substitute dynamic values like DID and timestamps
+        mapping: {
+            "id": "<uuid>",
+            "issuer": { "id": "<issuerDid>" },
+            "credentialSubject": { "id": "<subjectDid>" },
+            "issuanceDate": "<timestamp>",
+            "expirationDate": "<timestamp-in:365d>" // Example default 1 year expiry
+        },
+        
+        // For OIDC-based flows (jwt/issue), a Pre-Authorized Code flow is simplest for a demo, 
+        // though Authentication Code Flow (e.g., ID_TOKEN) is also an option.
+        authenticationMethod: 'PRE_AUTHORIZED',
+        standardVersion: 'DRAFT13' // Default to a recent draft
+        // Additional options like useJar, vpProfile, etc., can be added if needed
+    };
+
+    console.log('Attempting to issue walt.id Credential:', issuancePayload);
+
+    try {
+        const issuanceResponse = await fetchData(
+            `${waltidBaseUrlIssuer}/openid4vc/jwt/issue`,
+            'POST',
+            { 'Content-Type': 'application/json' },
+            issuancePayload
+        );
+
+        console.log('walt.id Issuance URL received:', issuanceResponse);
+
+        // The response for /openid4vc/jwt/issue is a JSON string of the issuance URL
+        if (typeof issuanceResponse === 'string') {
+             // The response is a string, which often is the URL itself (like "openid-credential-offer://...")
+            return issuanceResponse;
+        } else if (issuanceResponse.value) {
+            // Check for the OpenAPI example structure where it's wrapped
+            return issuanceResponse.value;
+        }
+        throw new Error("Invalid response format from walt.id issuance endpoint.");
+
+    } catch (error) {
+        console.error('Error during walt.id credential issuance:', error);
+        throw error;
+    }
+}
+
+
+/* SHARED IDENTITY LOADING FUNCTIONS (REMAINING AS IS) */
 
 /**
  * Loads Veramo-managed DIDs and updates a shared state.
@@ -98,7 +189,7 @@ async function loadPrivadoIdentities() {
     try {
         const identities = await fetchData(`${privadoBaseUrl}/identities`, 'GET', { 'Authorization': authorizationHeader, 'accept': 'application/json' });
         // Add a source label to each identity
-        return identities.map(identity => ({ ...identity, source: 'privado' }));
+        return identities.map(identity => ({ ...identity, source: 'privado', did: identity.identifier, displayName: identity.alias || 'Unnamed' }));
     } catch (error) {
         console.error("Error loading identities from Privado ID:", error);
         return [];
@@ -106,10 +197,37 @@ async function loadPrivadoIdentities() {
 }
 
 /**
- * Fetches DIDs from both Privado ID and Veramo and populates the UI dropdown.
+ * Loads existing identities from walt.id (assuming a simple list of available DIDs).
+ * Note: A real implementation may require a more complex API call if walt.id does not expose a list endpoint easily.
+ * For this example, we'll return a mock list since the walt.id OpenAPI spec doesn't show a DID list endpoint.
+ * @returns {Promise<Array<object>>} An array of mock walt.id identities.
+ */
+async function loadWaltidIdentities() {
+    console.warn("Using mock walt.id DID list. In a real app, integrate with walt.id's DID management.");
+    // This is a placeholder as the OpenAPI spec does not explicitly list a DID management endpoint.
+    // In a production walt.id deployment, you would likely fetch a list of registered DIDs.
+    return [
+        { 
+            identifier: 'did:key:z6MkjqFhR...', 
+            did: 'did:key:z6MkjqFhR...', 
+            source: 'waltid', 
+            displayName: 'Walt.id Issuer DID 1' 
+        },
+        { 
+            identifier: 'did:web:walt.id:issuer', 
+            did: 'did:web:walt.id:issuer', 
+            source: 'waltid', 
+            displayName: 'Walt.id Web DID' 
+        }
+    ];
+}
+
+
+/**
+ * Fetches DIDs from both Privado ID and Veramo AND WALT.ID and populates the UI dropdown.
  * This replaces the original `loadIdentities` function.
  */
-async function populateAllIssuers() {
+export async function populateAllIssuers() {
     // We will have a combined list of all DIDs available for issuance
     let allIssuers = [];
     
@@ -119,8 +237,12 @@ async function populateAllIssuers() {
     
     // Fetch identities from Privado ID and label them
     const privadoIdentities = await loadPrivadoIdentities();
-    allIssuers = allIssuers.concat(privadoIdentities);
+    allIssuers = allIssuers.concat(privadoIdentities.map(identity => ({ ...identity, identifier: identity.did || identity.identifier, did: identity.did || identity.identifier })));
     
+    // Fetch identities from walt.id and label them
+    const waltidIdentities = await loadWaltidIdentities();
+    allIssuers = allIssuers.concat(waltidIdentities.map(identity => ({ ...identity, identifier: identity.did || identity.identifier, did: identity.did || identity.identifier })));
+
     // Populate the dropdown with the combined list
     const identitySelectElement = getElement('identity-select');
     if (!identitySelectElement) return;
@@ -145,6 +267,8 @@ async function populateAllIssuers() {
         option.disabled = true;
     }
 }
+
+// --- REMAINING HELPER FUNCTIONS (REMAINING AS IS) ---
 
 /**
  * Renders dynamic input fields for a specific credential template within the issuance modal.
@@ -321,12 +445,14 @@ export function setupCredentialIssuerEventListeners() {
     const startIssuanceProcessBtn = getElement('start-issuance-process-btn');
     const issuanceDetailsModal = getElement('issuance-details-modal');
     const closeIssuanceDetailsModalBtn = getElement('close-issuance-details-modal');
-    const processIssuanceBtn = getElement('process-issuance-btn');
+    const processIssuanceBtn = getElement('process-issuance-btn'); // Privado ID button
     const dynamicFormsDiv = getElement('dynamic-credential-forms');
     const closeQrModalAndResetFormBtn = getElement('close-qr-modal-and-reset-form-btn');
     const qrCodeModal = getElement('qr-code-modal');
 
     const issueVeramoVcBtn = getElement('issue-veramo-vc-btn');
+    // NEW ELEMENT: walt.id issuance button
+    const issueWaltidVcBtn = getElement('issue-waltid-vc-btn');
 
     if (startIssuanceProcessBtn) {
         startIssuanceProcessBtn.addEventListener('click', async () => {
@@ -356,15 +482,17 @@ export function setupCredentialIssuerEventListeners() {
         });
     }
 
+    // --- PRIVADO ID ISSUANCE LOGIC (UNCHANGED) ---
     if (processIssuanceBtn) {
         processIssuanceBtn.addEventListener('click', async () => {
             if (!validateIssuanceDetailsForm()) { return; }
 
-            const issuerDid = getElement('identity-select').value;
-            const selectedOption = getElement('identity-select').selectedOptions[0];
+            const identitySelectElement = getElement('identity-select');
+            const issuerDid = identitySelectElement.value;
+            const selectedOption = identitySelectElement.selectedOptions[0];
             const issuerSource = selectedOption.dataset.source;
-            if (issuerSource === 'veramo') {
-                alert('You have selected a Veramo DID. Please use the "Issue with Veramo" button.');
+            if (issuerSource !== 'privado') {
+                alert('You have selected a Veramo or walt.id DID. Please use the appropriate button.');
                 return;
             }
             
@@ -405,7 +533,7 @@ export function setupCredentialIssuerEventListeners() {
                     expiration
                 );
 
-                console.log(`Attempting to issue ${template.name}:`, JSON.stringify(credentialData, null, 2));
+                console.log(`Attempting to issue ${template.name} with Privado ID:`, JSON.stringify(credentialData, null, 2));
 
                 try {
                     const newCredentialResponse = await fetchData(
@@ -414,12 +542,12 @@ export function setupCredentialIssuerEventListeners() {
                         { 'Authorization': authorizationHeader, 'accept': 'application/json' },
                         credentialData
                     );
-                    console.log(`${template.name} Issued:`, newCredentialResponse);
+                    console.log(`${template.name} Issued with Privado ID:`, newCredentialResponse);
 
                     const claimId = newCredentialResponse.id || newCredentialResponse.claimID;
                     if (!claimId) {
                         console.error(`Issued ${template.name} but missing 'id' (claim identifier):`, newCredentialResponse);
-                        alert(`Issued ${template.name}, but could not get claim ID to generate QR offer.`);
+                        //alert(`Issued ${template.name}, but could not get claim ID to generate QR offer.`);
                         allIssuanceSuccessful = false;
                         continue;
                     }
@@ -439,13 +567,13 @@ export function setupCredentialIssuerEventListeners() {
                         alert(`${template.name} issued and QR Link obtained. Click OK to continue.`);
                     } else {
                         console.error(`Did not receive a universalLink for ${template.name}:`, offerResponse);
-                        alert(`Failed to get QR link for ${template.name}.`);
+                        //alert(`Failed to get QR link for ${template.name}.`);
                         allIssuanceSuccessful = false;
                     }
 
                 } catch (error) {
-                    console.error(`Error issuing ${template.name}:`, error);
-                    alert(`Error issuing ${template.name}: ${error.message}`);
+                    console.error(`Error issuing ${template.name} with Privado ID:`, error);
+                    //alert(`Error issuing ${template.name}: ${error.message}`);
                     allIssuanceSuccessful = false;
                 }
             }
@@ -458,7 +586,7 @@ export function setupCredentialIssuerEventListeners() {
             } else if (allIssuanceSuccessful) {
                 alert('All selected credentials processed successfully, but no QR link was generated (this might happen if only non-QR offers are supported by the API).');
             } else {
-                alert('Some credentials failed to issue or generate QR links. Check console for details.');
+                //alert('Some credentials failed to issue or generate QR links. Check console for details.');
             }
         });
     }
@@ -470,7 +598,7 @@ export function setupCredentialIssuerEventListeners() {
         });
     }
 
-    // New event listener for the Veramo issuance button
+    // --- VERAMO ISSUANCE LOGIC (UNCHANGED) ---
     if (issueVeramoVcBtn) {
         issueVeramoVcBtn.addEventListener('click', async () => {
             if (!validateIssuanceDetailsForm()) {
@@ -478,11 +606,12 @@ export function setupCredentialIssuerEventListeners() {
                 return;
             }
             
-            const issuerDid = getElement('identity-select').value;
-            const selectedOption = getElement('identity-select').selectedOptions[0];
+            const identitySelectElement = getElement('identity-select');
+            const issuerDid = identitySelectElement.value;
+            const selectedOption = identitySelectElement.selectedOptions[0];
             const issuerSource = selectedOption.dataset.source;
             if (issuerSource !== 'veramo') {
-                 alert('You have selected a Privado ID DID. Please use the "Issue with Privado ID" button.');
+                 alert('You have selected a Privado ID or walt.id DID. Please use the appropriate button.');
                  return;
             }
             
@@ -492,6 +621,10 @@ export function setupCredentialIssuerEventListeners() {
             if (selectedTemplates.length === 0) {
                 alert('Please select a credential template first.');
                 return;
+            }
+            // For a simplified example, we'll process only the first selected template for Veramo
+            if (selectedTemplates.length > 1) {
+                alert('Note: Only the first selected credential type will be issued by Veramo in this demo.');
             }
             const template = selectedTemplates[0];
 
@@ -529,7 +662,81 @@ export function setupCredentialIssuerEventListeners() {
 
             } catch (error) {
                 console.error('Error issuing Veramo credential:', error);
-                alert(`Error issuing Veramo credential: ${error.message}`);
+                //alert(`Error issuing Veramo credential: ${error.message}`);
+            }
+        });
+    }
+    
+    // --- NEW WALT.ID ISSUANCE LOGIC ---
+    if (issueWaltidVcBtn) {
+        issueWaltidVcBtn.addEventListener('click', async () => {
+            if (!validateIssuanceDetailsForm()) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+            
+            const identitySelectElement = getElement('identity-select');
+            const issuerDid = identitySelectElement.value;
+            const selectedOption = identitySelectElement.selectedOptions[0];
+            const issuerSource = selectedOption.dataset.source;
+            if (issuerSource !== 'waltid') {
+                alert('You have selected a Privado ID or Veramo DID. Please use the appropriate button.');
+                return;
+            }
+            
+            const subjectId = getElement('subjectId').value;
+            
+            const selectedTemplates = getSelectedCredentialTemplates();
+            if (selectedTemplates.length === 0) {
+                alert('Please select a credential template first.');
+                return;
+            }
+            // walt.id's OIDC flow handles a single credential issuance per request to a specific endpoint, 
+            // though batch is available. For simplicity, we'll use the single issue endpoint.
+            if (selectedTemplates.length > 1) {
+                alert('Note: Only the first selected credential type will be issued by walt.id in this demo.');
+            }
+            const template = selectedTemplates[0];
+
+            const credentialSubjectData = {};
+            template.fields.forEach(field => {
+                const inputElement = getElement(`${template.type}-${field.id}`);
+                if (inputElement) {
+                    if (inputElement.type === 'checkbox') {
+                        credentialSubjectData[field.id] = inputElement.checked;
+                    } else if (field.type === 'number') {
+                        credentialSubjectData[field.id] = parseFloat(inputElement.value) || undefined;
+                    } else if (field.type === 'date') {
+                        const dateValue = inputElement.value;
+                        if (dateValue) {
+                            // walt.id examples use ISO strings in credentialData, but mapping handles formatting.
+                            credentialSubjectData[field.id] = dateValue; 
+                        } else {
+                            credentialSubjectData[field.id] = undefined;
+                        }
+                    } else {
+                        credentialSubjectData[field.id] = inputElement.value.trim();
+                    }
+                }
+            });
+
+            try {
+                const issuanceUrl = await issueWaltidCredential(issuerDid, subjectId, template, credentialSubjectData);
+                
+                if (issuanceDetailsModal) {
+                    issuanceDetailsModal.style.display = 'none';
+                }
+                
+                displayQrCode(issuanceUrl);
+                alert('walt.id Credential issuance flow started. Scan the QR code to continue.');
+                
+                // We keep the form open until the QR modal is closed to allow for re-scanning if needed,
+                // but we clear the inputs to prepare for the next issuance.
+                // resetIssuanceForm(); // Keeping reset in closeQrModalAndResetFormBtn listener
+
+            } catch (error) {
+                console.error('Error issuing walt.id credential:', error);
+                //alert(`Error issuing walt.id credential: ${error.message}`);
             }
         });
     }
